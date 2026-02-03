@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Simulador de Progreso Falso</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #111;
+      color: #eee;
+      text-align: center;
+      padding: 30px;
+    }
+    button {
+      padding: 10px 20px;
+      margin: 8px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    .warning {
+      color: #ff7777;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+
+<h1>Simulador de Progreso Falso</h1>
+<p>Todo mejora. Nada se estabiliza.</p>
+
+<div id="stats"></div>
+
+<button onclick="action('produccion')">Optimizar procesos</button>
+<button onclick="action('crecimiento')">Expandirse</button>
+<button onclick="action('prestigio')">Invertir en imagen</button>
+<button onclick="action('ignorar')">Ignorar advertencias</button>
+
+<p class="warning" id="message"></p>
+
+<script>
+let produccion = 10;
+let crecimiento = 10;
+let prestigio = 10;
+let presion = 0;
+
+function render() {
+  document.getElementById("stats").innerHTML = `
+    <p>Producción: ${produccion}</p>
+    <p>Crecimiento: ${crecimiento}</p>
+    <p>Prestigio: ${prestigio}</p>
+  `;
+}
+
+function action(type) {
+  produccion += Math.floor(Math.random() * 5);
+  crecimiento += Math.floor(Math.random() * 5);
+  prestigio += Math.floor(Math.random() * 5);
+
+  if (type === "ignorar") presion += 5;
+  else presion += 2;
+
+  check();
+  render();
+}
+
+function check() {
+  const msg = document.getElementById("message");
+
+  if (presion > 20 && presion < 40) {
+    msg.textContent = "Tus números son excelentes. Tu sistema es frágil.";
+  } else if (presion >= 40 && presion < 60) {
+    msg.textContent = "Esto no es sostenible. Continúas igualmente.";
+  } else if (presion >= 60) {
+    msg.innerHTML = "Todo funcionaba.<br>Hasta que dejó de hacerlo.";
+    document.querySelectorAll("button").forEach(b => b.disabled = true);
+  }
+}
+
+render();
+</script>
+
+</body>
+</html>
