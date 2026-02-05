@@ -174,7 +174,19 @@ function check(){
     document.querySelectorAll("button").forEach(b=>b.disabled=true);
     document.getElementById("message").textContent="";
     document.getElementById("gameover").style.display="block";
-  }
+ }
+
+ function resetGame(){
+  prod = 10;
+  crec = 10;
+  pres = 10;
+  press = 0;
+
+  document.body.classList.remove("collapse");
+  document.getElementById("gameover").style.display = "none";
+
+  document.querySelectorAll("button").forEach(b=>b.disabled=false);
+
 }
 
 update();
