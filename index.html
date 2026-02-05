@@ -105,7 +105,7 @@ body.collapse {
 
 </div>
 
-<div class="buttons">
+<div class="buttons" id="actions">
   <button onclick="act()">Optimizar procesos</button>
   <button onclick="act()">Expandirse</button>
   <button onclick="act()">Invertir en imagen</button>
@@ -171,11 +171,11 @@ function rand(min=2,max=6){
 function check(){
   if(press>=100){
     document.body.classList.add("collapse");
-    document.querySelectorAll("button").forEach(b=>b.disabled=true);
+    document.querySelectorAll("#actions button").forEach(b=>b.disabled=true);
     document.getElementById("message").textContent="";
     document.getElementById("gameover").style.display="block";
-    }
- }
+  }
+}
 
  function resetGame(){
   prod = 10;
@@ -185,9 +185,8 @@ function check(){
 
   document.body.classList.remove("collapse");
   document.getElementById("gameover").style.display = "none";
+  document.querySelectorAll("#actions button").forEach(b=>b.disabled=false);
 
-  document.querySelectorAll("button").forEach(b=>b.disabled=false);
-   
   update();
   message("Empieza la simulación.");
 }
