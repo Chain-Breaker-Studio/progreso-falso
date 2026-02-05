@@ -8,36 +8,19 @@
 body {
   margin: 0;
   font-family: Arial, sans-serif;
-  background: radial-gradient(circle at top, #222, #000);
+  background: #0e0e0e;
   color: #eee;
   text-align: center;
   padding: 30px;
 }
 
-h1 {
-  font-size: 2.2em;
-  margin-bottom: 0;
-}
+h1 { margin-bottom: 5px; }
+.subtitle { opacity: 0.7; margin-bottom: 25px; }
 
-.subtitle {
-  opacity: 0.7;
-  margin-bottom: 30px;
-}
+.panel { max-width: 520px; margin: auto; }
 
-.panel {
-  max-width: 500px;
-  margin: auto;
-}
-
-.stat {
-  margin: 15px 0;
-  text-align: left;
-}
-
-.label {
-  font-size: 14px;
-  margin-bottom: 4px;
-}
+.stat { margin: 14px 0; text-align: left; }
+.label { font-size: 14px; margin-bottom: 4px; }
 
 .bar {
   height: 18px;
@@ -49,38 +32,39 @@ h1 {
 .fill {
   height: 100%;
   width: 0%;
-  transition: width 0.4s ease, background 0.4s ease;
+  transition: width 0.4s ease;
 }
 
-.buttons {
-  margin-top: 30px;
-}
+.buttons { margin-top: 30px; }
 
 button {
-  padding: 10px 15px;
+  padding: 10px 14px;
   margin: 6px;
-  font-size: 14px;
-  cursor: pointer;
   background: #222;
   color: #eee;
   border: 1px solid #444;
   border-radius: 6px;
+  cursor: pointer;
 }
 
-button:hover {
-  background: #333;
-}
+button:hover { background: #333; }
 
-.alert {
-  margin-top: 25px;
-  min-height: 40px;
-  font-style: italic;
+#message {
+  margin-top: 30px;
+  min-height: 60px;
+  font-size: 16px;
   color: #ff7777;
 }
 
+#gameover {
+  display: none;
+  margin-top: 40px;
+  font-size: 20px;
+}
+
 body.collapse {
+  background: #2a0000;
   animation: shake 0.3s infinite;
-  background: radial-gradient(circle at center, #400, #000);
 }
 
 @keyframes shake {
@@ -116,7 +100,7 @@ body.collapse {
 
   <div class="stat">
     <div class="label">Presión del sistema</div>
-    <div class="bar"><div id="press" class="fill"></div></div>
+    <div class="bar"><div id="pressure" class="fill"></div></div>
   </div>
 
 </div>
@@ -128,65 +112,73 @@ body.collapse {
   <button onclick="ignore()">Ignorar advertencias</button>
 </div>
 
-<div id="alert" class="alert"></div>
+<div id="message"></div>
+
+<div id="gameover">
+  <p>El sistema colapsó.<br>Nadie sabe exactamente cuándo ocurrió el error.</p>
+  <button onclick="location.reload()">Reiniciar simulación</button>
+</div>
 
 <script>
-let prod = 10, crec = 10, pres = 10, pressure = 0;
+let prod=10, crec=10, pres=10, press=0;
 
-function update() {
-  set("prod", prod, "#4caf50");
-  set("crec", crec, "#2196f3");
-  set("pres", pres, "#ffc107");
-  set("press", pressure, "#f44336");
+function clamp(v){ return Math.min(v,100); }
+
+function update(){
+  set("prod",prod,"#4caf50");
+  set("crec",crec,"#2196f3");
+  set("pres",pres,"#ffc107");
+  set("pressure",press,"#f44336");
 }
 
-function set(id, val, color) {
-  const el = document.getElementById(id);
-  el.style.width = Math.min(val,100) + "%";
-  el.style.background = color;
+function set(id,val,color){
+  const el=document.getElementById(id);
+  el.style.width=clamp(val)+"%";
+  el.style.background=color;
 }
 
-function act() {
-  prod += rand();
-  crec += rand();
-  pres += rand();
-  pressure += rand(2,5);
-  message();
+function phaseMessage(){
+  if(press<20) return "Todo parece bajo control.";
+  if(press<40) return "Los números suben demasiado rápido.";
+  if(press<60) return "Empiezan a aparecer tensiones invisibles.";
+  if(press<80) return "Esto ya no es sostenible.";
+  return "El sistema está al límite.";
+}
+
+function act(){
+  prod+=rand(); crec+=rand(); pres+=rand();
+  press+=rand(2,4);
+  message(phaseMessage());
   check();
   update();
 }
 
-function ignore() {
-  pressure += rand(5,10);
-  message(true);
+function ignore(){
+  press+=rand(6,10);
+  message("Ignoras las advertencias. El sistema se resiente.");
   check();
   update();
 }
 
-function rand(min=1,max=6) {
+function message(txt){
+  document.getElementById("message").textContent = txt;
+}
+
+function rand(min=2,max=6){
   return Math.floor(Math.random()*(max-min+1))+min;
 }
 
-function message(ignore=false) {
-  const msgs = ignore
-    ? ["Todo parece estable… por ahora.",
-       "Las alarmas suenan en silencio.",
-       "Decides mirar hacia otro lado."]
-    : ["El sistema responde bien.",
-       "Los números suben.",
-       "Esto parece funcionar."];
-  alert.textContent = msgs[Math.floor(Math.random()*msgs.length)];
-}
-
-function check() {
-  if (pressure > 70) {
+function check(){
+  if(press>=100){
     document.body.classList.add("collapse");
-    alert.innerHTML = "El sistema colapsa.<br>Nadie sabe exactamente por qué.";
-    document.querySelectorAll("button").forEach(b => b.disabled = true);
+    document.querySelectorAll("button").forEach(b=>b.disabled=true);
+    document.getElementById("message").textContent="";
+    document.getElementById("gameover").style.display="block";
   }
 }
 
 update();
+message("Empieza la simulación.");
 </script>
 
 </body>
