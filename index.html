@@ -116,7 +116,7 @@ body.collapse {
 
 <div id="gameover">
   <p>El sistema colapsó.<br>Nadie sabe exactamente cuándo ocurrió el error.</p>
-  <button onclick="location.reload()">Reiniciar simulación</button>
+  <button onclick="resetGame()">Reiniciar simulación</button>
 </div>
 
 <script>
@@ -129,6 +129,22 @@ function update(){
   set("crec",crec,"#2196f3");
   set("pres",pres,"#ffc107");
   set("pressure",press,"#f44336");
+  
+function resetGame(){
+  prod = 10;
+  crec = 10;
+  pres = 10;
+  press = 0;
+
+  document.body.classList.remove("collapse");
+  document.getElementById("gameover").style.display = "none";
+
+  document.querySelectorAll("button").forEach(b=>b.disabled=false);
+
+  update();
+  message("Empieza la simulación.");
+}
+
 }
 
 function set(id,val,color){
