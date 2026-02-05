@@ -186,7 +186,9 @@ function check(){
   document.getElementById("gameover").style.display = "none";
 
   document.querySelectorAll("button").forEach(b=>b.disabled=false);
-
+   
+  update();
+  message("Empieza la simulación.");
 }
 
 update();
