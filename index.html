@@ -121,6 +121,9 @@ body.collapse {
 
 <script>
 let prod=10, crec=10, pres=10, press=0;
+let inactivityTimer;
+let autoPressureSpeed = 1;
+let gameEnded = false;
 
 function clamp(v){ return Math.min(v,100); }
 
@@ -138,6 +141,10 @@ function set(id,val,color){
 }
 
 function phaseMessage(){
+  if(prod>=100 && crec>=100 && pres>=100 && press<80){
+    autoPressureSpeed = 3;
+    return "Rendimiento máximo alcanzado. Sigue creciendo.";
+  }
   if(press<20) return "Todo parece bajo control.";
   if(press<40) return "Los números suben demasiado rápido.";
   if(press<60) return "Empiezan a aparecer tensiones invisibles.";
@@ -146,7 +153,11 @@ function phaseMessage(){
 }
 
 function act(){
-  prod+=rand(); crec+=rand(); pres+=rand();
+  if(gameEnded) return;
+  resetInactivity();
+  prod+=rand();
+  crec+=rand();
+  pres+=rand();
   press+=rand(2,4);
   message(phaseMessage());
   check();
@@ -154,6 +165,8 @@ function act(){
 }
 
 function ignore(){
+  if(gameEnded) return;
+  resetInactivity();
   press+=rand(6,10);
   message("Ignoras las advertencias. El sistema se resiente.");
   check();
@@ -169,7 +182,8 @@ function rand(min=2,max=6){
 }
 
 function check(){
-  if(press>=100){
+  if(press>=100 && !gameEnded){
+    gameEnded = true;
     document.body.classList.add("collapse");
     document.querySelectorAll("#actions button").forEach(b=>b.disabled=true);
     document.getElementById("message").textContent="";
@@ -177,11 +191,13 @@ function check(){
   }
 }
 
- function resetGame(){
+function resetGame(){
   prod = 10;
   crec = 10;
   pres = 10;
   press = 0;
+  autoPressureSpeed = 1;
+  gameEnded = false;
 
   document.body.classList.remove("collapse");
   document.getElementById("gameover").style.display = "none";
@@ -189,11 +205,36 @@ function check(){
 
   update();
   message("Empieza la simulación.");
+  resetInactivity();
 }
+
+function resetInactivity(){
+  clearTimeout(inactivityTimer);
+  inactivityTimer = setTimeout(secretEnding,12000);
+}
+
+function secretEnding(){
+  if(gameEnded) return;
+  gameEnded = true;
+  document.body.classList.remove("collapse");
+  document.querySelectorAll("#actions button").forEach(b=>b.disabled=true);
+  document.getElementById("gameover").style.display="none";
+  message("Has dejado de crecer.\nEl sistema se estabiliza.\n\nEl progreso era el problema.");
+}
+
+setInterval(()=>{
+  if(!gameEnded && press<100){
+    press += autoPressureSpeed;
+    update();
+    check();
+  }
+},1000);
 
 update();
 message("Empieza la simulación.");
+resetInactivity();
 </script>
+
 
 </body>
 </html>
