@@ -129,6 +129,24 @@ body.collapse {
   }
 }
 
+body.ending {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+body.ending .panel,
+body.ending #actions {
+  display: none;
+}
+
+body.ending #gameover {
+  display: block !important;
+  font-size: 22px;
+}
+
+
 </style>
 </head>
 
@@ -241,6 +259,7 @@ function check(){
   if(press>=100 && !gameEnded){
     gameEnded = true;
     document.body.classList.add("collapse");
+    document.body.classList.add("ending");
     document.querySelectorAll("#actions button").forEach(b=>b.disabled=true);
     document.getElementById("message").textContent="";
     document.getElementById("gameover").style.display="block";
@@ -256,6 +275,7 @@ function resetGame(){
   gameEnded = false;
 
   document.body.classList.remove("collapse");
+  document.body.classList.remove("ending");
   document.getElementById("gameover").style.display = "none";
   document.querySelectorAll("#actions button").forEach(b=>b.disabled=false);
 
@@ -274,8 +294,8 @@ function secretEnding(){
   gameEnded = true;
 
   document.body.classList.remove("collapse");
+  document.body.classList.add("ending");
   document.querySelectorAll("#actions button").forEach(b=>b.disabled=true);
-
   document.getElementById("gameover").style.display="block";
   document.getElementById("gameover").innerHTML = `
     <p>Has dejado de crecer.<br>
