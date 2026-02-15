@@ -216,10 +216,17 @@ function resetInactivity(){
 function secretEnding(){
   if(gameEnded) return;
   gameEnded = true;
+
   document.body.classList.remove("collapse");
   document.querySelectorAll("#actions button").forEach(b=>b.disabled=true);
-  document.getElementById("gameover").style.display="none";
-  message("Has dejado de crecer.\nEl sistema se estabiliza.\n\nEl progreso era el problema.");
+
+  document.getElementById("gameover").style.display="block";
+  document.getElementById("gameover").innerHTML = `
+    <p>Has dejado de crecer.<br>
+    El sistema se estabiliza.<br><br>
+    <strong>El progreso era el problema.</strong></p>
+    <button onclick="resetGame()">Reiniciar simulación</button>
+  `;
 }
 
 setInterval(()=>{
