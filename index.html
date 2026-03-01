@@ -166,6 +166,38 @@ body.ending {
   justify-content: center;
 }
 
+/* === FINAL VERDADERO ESTILO FRÍO === */
+body.true-ending {
+  background: radial-gradient(circle at top, #0a1f2e, #000);
+}
+
+body.true-ending::before {
+  animation: none;
+  background: linear-gradient(120deg, rgba(0,150,255,0.08), rgba(0,255,200,0.05));
+}
+
+/* Ajuste responsive pantalla final */
+body.ending #gameover {
+  width: 90%;
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+@media (max-width: 480px) {
+  #gameover {
+    font-size: 20px;
+    line-height: 1.5;
+    padding: 15px;
+  }
+
+  #gameover button {
+    font-size: 14px;
+    padding: 10px;
+  }
+}
+
 body.ending .subtitle,
 body.ending .panel,
 body.ending .buttons,
@@ -328,7 +360,7 @@ function secretEnding(){
       clearInterval(calmInterval);
       gameEnded = true;
       document.getElementById("message").textContent="";
-      document.body.classList.add("ending");
+      document.body.classList.add("ending","true-ending");
 
       showFinal(`
         🏆 <strong>FINAL VERDADERO</strong><br><br>
@@ -356,7 +388,7 @@ function resetGame(){
   prod=10; crec=10; pres=10; press=0;
   autoPressureSpeed=1;
   gameEnded=false;
-  document.body.classList.remove("collapse","ending");
+  document.body.classList.remove("collapse","ending","true-ending");
   document.getElementById("gameover").style.display="none";
   message("Empieza la simulación.");
   update();
@@ -381,7 +413,9 @@ message("Empieza la simulación.");
 resetInactivity();
 </script>
 
-<script src="https://pl28823082.effectivegatecpm.com/3b/76/22/3b76226b7a97057e8739c0a1ddb8b653.js"></script>
+<script  
+  src="https://pl28823082.effectivegatecpm.com/3b/76/22/3b76226b7a97057e8739c0a1ddb8b653.js">
+</script>
 
 </body>
 </html>
