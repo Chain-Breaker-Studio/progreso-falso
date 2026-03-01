@@ -275,7 +275,8 @@ function update(){
   if(press>70){ document.getElementById("warnBtn").classList.add("warningPulse"); }
   else{ document.getElementById("warnBtn").classList.remove("warningPulse"); }
 
-  document.body.style.background=
+  if(!gameEnded){
+  document.body.style.background =
     `radial-gradient(circle at top, rgb(${30+press*2},0,0), #000)`;
 }
 
