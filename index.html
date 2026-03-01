@@ -21,13 +21,10 @@ html, body {
   flex-direction: column;
   align-items: center;
   box-sizing: border-box;
-  transition: background 1s ease;
+  transition: background 0.6s ease;
 }
 
-body.calm {
-  background: radial-gradient(circle at top, #001a2e, #000814);
-}
-
+/* Fondo reactivo */
 body::before {
   content: "";
   position: fixed;
@@ -54,6 +51,7 @@ h1 {
   font-size: 16px;
 }
 
+/* Panel */
 .panel {
   width: 90%;
   max-width: 520px;
@@ -79,9 +77,10 @@ h1 {
 .fill {
   height: 100%;
   width: 0%;
-  transition: width 0.6s ease, box-shadow 0.3s ease;
+  transition: width 0.4s ease, box-shadow 0.3s ease;
 }
 
+/* Barra crítica */
 .critical {
   animation: criticalPulse 0.6s infinite alternate;
 }
@@ -91,6 +90,7 @@ h1 {
   to { box-shadow: 0 0 30px #ff0000; }
 }
 
+/* Botones */
 .buttons {
   width: 90%;
   max-width: 520px;
@@ -117,11 +117,23 @@ button:hover {
   transform: scale(1.05);
 }
 
+/* Impacto click */
 button:active {
   transform: scale(0.96);
   box-shadow: 0 0 25px #ff0000;
 }
 
+/* Pulsación advertencia */
+.warningPulse {
+  animation: warningPulse 1s infinite alternate;
+}
+
+@keyframes warningPulse {
+  from { box-shadow: 0 0 8px #ff4444; }
+  to { box-shadow: 0 0 22px #ff0000; }
+}
+
+/* Mensajes */
 #message {
   width: 90%;
   max-width: 520px;
@@ -129,15 +141,18 @@ button:active {
   font-weight: 600;
   min-height: 40px;
   margin-bottom: 10px;
-  transition: color 0.3s;
+  transition: color 0.3s, text-shadow 0.3s;
 }
 
+/* Gameover */
 #gameover {
   display: none;
   width: 90%;
   max-width: 520px;
   font-size: 24px;
-  line-height: 1.7;
+  line-height: 1.6;
+  color: #ffbb33;
+  text-shadow: 0 0 20px #ff6600;
   margin-top: 30px;
   animation: finalAppear 1s ease forwards;
 }
@@ -169,6 +184,11 @@ body.collapse {
   50% { transform: translate(-2px,2px); }
   75% { transform: translate(2px,2px); }
 }
+
+@media (max-width: 480px) {
+  h1 { font-size: 22px; }
+  button { font-size: 14px; }
+}
 </style>
 </head>
 
@@ -188,7 +208,7 @@ body.collapse {
   <button onclick="act()">⚡ Optimizar procesos</button>
   <button onclick="act()">🚀 Expandirse</button>
   <button onclick="act()">🌟 Invertir en imagen</button>
-  <button onclick="ignore()">⚠️ Ignorar advertencias</button>
+  <button id="warnBtn" onclick="ignore()">⚠️ Ignorar advertencias</button>
 </div>
 
 <div id="message"></div>
@@ -199,6 +219,7 @@ let prod=10, crec=10, pres=10, press=0;
 let inactivityTimer;
 let autoPressureSpeed=1;
 let gameEnded=false;
+let typingInterval;
 
 function clamp(v){ return Math.min(v,100); }
 
@@ -214,6 +235,16 @@ function update(){
   setBar("crec",crec,"#2196f3");
   setBar("pres",pres,"#ffc107");
   setBar("pressure",press,"#f44336");
+
+  const pressureBar=document.getElementById("pressure");
+  if(press>80){ pressureBar.classList.add("critical"); }
+  else{ pressureBar.classList.remove("critical"); }
+
+  if(press>70){ document.getElementById("warnBtn").classList.add("warningPulse"); }
+  else{ document.getElementById("warnBtn").classList.remove("warningPulse"); }
+
+  document.body.style.background=
+    `radial-gradient(circle at top, rgb(${30+press*2},0,0), #000)`;
 }
 
 function rand(min=2,max=6){
@@ -221,13 +252,30 @@ function rand(min=2,max=6){
 }
 
 function message(txt){
-  document.getElementById("message").textContent=txt;
+  clearInterval(typingInterval);
+  const el=document.getElementById("message");
+  el.textContent="";
+  el.style.textShadow="";
+  
+  if(press<40) el.style.color="#00ffcc";
+  else if(press<70) el.style.color="#ffc107";
+  else el.style.color="#ff4444";
+
+  let i=0;
+  typingInterval=setInterval(()=>{
+    if(i<txt.length){
+      el.textContent+=txt[i];
+      i++;
+    } else clearInterval(typingInterval);
+  },20);
 }
 
 function phaseMessage(){
-  if(press<40) return "Todo parece bajo control.";
-  if(press<70) return "Los números siguen subiendo.";
-  return "El sistema exige más.";
+  if(press<20) return "✅ Todo parece bajo control.";
+  if(press<40) return "⚠️ Los números suben demasiado rápido.";
+  if(press<60) return "💥 Tensiones invisibles empiezan a aparecer.";
+  if(press<80) return "🔥 Esto ya no es sostenible.";
+  return "🚨 El sistema está al límite!";
 }
 
 function act(){
@@ -246,7 +294,7 @@ function ignore(){
   if(gameEnded) return;
   resetInactivity();
   press+=rand(6,10);
-  message("Ignoras las advertencias.");
+  message("⚠️ Ignoras las advertencias. El sistema se resiente.");
   check();
   update();
 }
@@ -254,35 +302,47 @@ function ignore(){
 function check(){
   if(press>=100 && !gameEnded){
     gameEnded=true;
+    clearInterval(typingInterval);
+    document.getElementById("message").textContent="";
     document.body.classList.add("collapse","ending");
-    showFinal("💥 El sistema colapsó.<br><br><strong>Seguiste creciendo.<br>Era inevitable.</strong>");
+    showFinal("💥 El sistema colapsó.<br><br><strong>El progreso era insostenible.</strong>");
   }
 }
 
 function secretEnding(){
   if(gameEnded) return;
-  gameEnded=true;
 
-  clearInterval(inactivityTimer);
+  clearInterval(typingInterval);
+  clearTimeout(inactivityTimer);
 
-  // Baja la presión visualmente
-  let interval=setInterval(()=>{
-    if(press>0){
-      press-=2;
+  // Detener subida automática
+  autoPressureSpeed = 0;
+
+  message("⏳ Deteniendo crecimiento...");
+  
+  let calmInterval = setInterval(() => {
+    if(press > 0){
+      press -= 2;
       update();
     } else {
-      clearInterval(interval);
-      document.body.classList.add("calm","ending");
+      clearInterval(calmInterval);
+      gameEnded = true;
+      document.getElementById("message").textContent="";
+      document.body.classList.add("ending");
+
       showFinal(`
-      🏆 Has descubierto la única forma de ganar.<br><br>
-      No crecer.<br><br>
-      Mientras el sistema exigía expansión infinita,
-      tú decidiste parar.<br><br>
-      <strong>Y funcionó.</strong><br><br>
-      El progreso infinito era la trampa.
+        🏆 <strong>FINAL VERDADERO</strong><br><br>
+        Has dejado de producir.<br>
+        Has dejado de expandirte.<br>
+        Has dejado de optimizar.<br><br>
+        La presión desaparece.<br>
+        El sistema se estabiliza.<br><br>
+        <strong>No era crecer más.</strong><br>
+        <strong>Era dejar de hacerlo.</strong><br><br>
+        El progreso era el problema.
       `);
     }
-  },30);
+  }, 40);
 }
 
 function showFinal(text){
@@ -294,8 +354,9 @@ function showFinal(text){
 
 function resetGame(){
   prod=10; crec=10; pres=10; press=0;
+  autoPressureSpeed=1;
   gameEnded=false;
-  document.body.classList.remove("collapse","ending","calm");
+  document.body.classList.remove("collapse","ending");
   document.getElementById("gameover").style.display="none";
   message("Empieza la simulación.");
   update();
