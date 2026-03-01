@@ -21,7 +21,7 @@ html, body {
   flex-direction: column;
   align-items: center;
   box-sizing: border-box;
-  transition: background 0.5s ease;
+  transition: background 0.6s ease;
 }
 
 /* Fondo reactivo */
@@ -42,7 +42,7 @@ body::before {
 h1 {
   margin: 20px 0 5px;
   font-size: 28px;
-  text-shadow: 0 0 12px #ff4444;
+  text-shadow: 0 0 18px #ff4444;
 }
 
 .subtitle {
@@ -57,9 +57,9 @@ h1 {
   max-width: 520px;
   padding: 25px;
   background: rgba(255,255,255,0.05);
-  backdrop-filter: blur(12px);
-  border-radius: 16px;
-  box-shadow: 0 0 40px rgba(0,0,0,0.6);
+  backdrop-filter: blur(14px);
+  border-radius: 18px;
+  box-shadow: 0 0 60px rgba(0,0,0,0.8);
   margin-bottom: 20px;
   box-sizing: border-box;
 }
@@ -80,14 +80,14 @@ h1 {
   transition: width 0.4s ease, box-shadow 0.3s ease;
 }
 
-/* Glow crítico */
+/* Barra crítica */
 .critical {
   animation: criticalPulse 0.6s infinite alternate;
 }
 
 @keyframes criticalPulse {
-  from { box-shadow: 0 0 8px #ff0000; }
-  to { box-shadow: 0 0 20px #ff0000; }
+  from { box-shadow: 0 0 10px #ff0000; }
+  to { box-shadow: 0 0 30px #ff0000; }
 }
 
 /* Botones */
@@ -107,14 +107,20 @@ button {
   background: #111;
   color: #eee;
   border: 1px solid #444;
-  border-radius: 8px;
+  border-radius: 10px;
   cursor: pointer;
-  transition: 0.3s;
+  transition: 0.25s;
 }
 
 button:hover {
-  box-shadow: 0 0 12px #00ffff;
-  transform: scale(1.04);
+  box-shadow: 0 0 18px #00ffff;
+  transform: scale(1.05);
+}
+
+/* Impacto click */
+button:active {
+  transform: scale(0.96);
+  box-shadow: 0 0 25px #ff0000;
 }
 
 /* Pulsación advertencia */
@@ -123,8 +129,8 @@ button:hover {
 }
 
 @keyframes warningPulse {
-  from { box-shadow: 0 0 5px #ff4444; }
-  to { box-shadow: 0 0 18px #ff0000; }
+  from { box-shadow: 0 0 8px #ff4444; }
+  to { box-shadow: 0 0 22px #ff0000; }
 }
 
 /* Mensajes */
@@ -135,7 +141,7 @@ button:hover {
   font-weight: 600;
   min-height: 40px;
   margin-bottom: 10px;
-  transition: color 0.3s;
+  transition: color 0.3s, text-shadow 0.3s;
 }
 
 /* Gameover */
@@ -146,13 +152,13 @@ button:hover {
   font-size: 24px;
   line-height: 1.6;
   color: #ffbb33;
-  text-shadow: 0 0 12px #ff6600;
+  text-shadow: 0 0 20px #ff6600;
   margin-top: 30px;
   animation: finalAppear 1s ease forwards;
 }
 
 @keyframes finalAppear {
-  from { opacity: 0; transform: scale(0.8); }
+  from { opacity: 0; transform: scale(0.7); }
   to { opacity: 1; transform: scale(1); }
 }
 
@@ -198,7 +204,7 @@ body.collapse {
   <div class="stat"><div class="label">Presión del sistema</div><div class="bar"><div id="pressure" class="fill"></div></div></div>
 </div>
 
-<div class="buttons" id="actions">
+<div class="buttons">
   <button onclick="act()">⚡ Optimizar procesos</button>
   <button onclick="act()">🚀 Expandirse</button>
   <button onclick="act()">🌟 Invertir en imagen</button>
@@ -221,7 +227,7 @@ function setBar(id,val,color){
   const el=document.getElementById(id);
   el.style.width=clamp(val)+"%";
   el.style.background=color;
-  el.style.boxShadow=`0 0 ${val/5}px ${color}`;
+  el.style.boxShadow=`0 0 ${val/4}px ${color}`;
 }
 
 function update(){
@@ -238,18 +244,23 @@ function update(){
   else{ document.getElementById("warnBtn").classList.remove("warningPulse"); }
 
   document.body.style.background=
-    `radial-gradient(circle at top, rgb(${20+press},0,0), #000)`;
+    `radial-gradient(circle at top, rgb(${30+press*2},0,0), #000)`;
 }
 
 function rand(min=2,max=6){
   return Math.floor(Math.random()*(max-min+1))+min;
 }
 
-/* Typewriter */
 function message(txt){
   clearInterval(typingInterval);
   const el=document.getElementById("message");
   el.textContent="";
+  el.style.textShadow="";
+  
+  if(press<40) el.style.color="#00ffcc";
+  else if(press<70) el.style.color="#ffc107";
+  else el.style.color="#ff4444";
+
   let i=0;
   typingInterval=setInterval(()=>{
     if(i<txt.length){
@@ -291,6 +302,8 @@ function ignore(){
 function check(){
   if(press>=100 && !gameEnded){
     gameEnded=true;
+    clearInterval(typingInterval);
+    document.getElementById("message").textContent="";
     document.body.classList.add("collapse","ending");
     showFinal("💥 El sistema colapsó.<br><br><strong>El progreso era insostenible.</strong>");
   }
@@ -299,6 +312,8 @@ function check(){
 function secretEnding(){
   if(gameEnded) return;
   gameEnded=true;
+  clearInterval(typingInterval);
+  document.getElementById("message").textContent="";
   document.body.classList.add("ending");
   showFinal("⏳ Has dejado de crecer.<br>El sistema se estabiliza.<br><br><strong>El progreso era el problema.</strong>");
 }
@@ -339,9 +354,7 @@ message("Empieza la simulación.");
 resetInactivity();
 </script>
 
-<script
-  src="https://pl28823082.effectivegatecpm.com/3b/76/22/3b76226b7a97057e8739c0a1ddb8b653.js">
-</script>
+<script src="https://pl28823082.effectivegatecpm.com/3b/76/22/3b76226b7a97057e8739c0a1ddb8b653.js"></script>
 
 </body>
 </html>
