@@ -21,9 +21,10 @@ html, body {
   flex-direction: column;
   align-items: center;
   box-sizing: border-box;
+  transition: background 0.5s ease;
 }
 
-/* Fondo animado */
+/* Fondo reactivo */
 body::before {
   content: "";
   position: fixed;
@@ -41,7 +42,7 @@ body::before {
 h1 {
   margin: 20px 0 5px;
   font-size: 28px;
-  text-shadow: 0 0 8px #ff4444;
+  text-shadow: 0 0 12px #ff4444;
 }
 
 .subtitle {
@@ -56,9 +57,9 @@ h1 {
   max-width: 520px;
   padding: 25px;
   background: rgba(255,255,255,0.05);
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(12px);
   border-radius: 16px;
-  box-shadow: 0 0 40px rgba(0,0,0,0.5);
+  box-shadow: 0 0 40px rgba(0,0,0,0.6);
   margin-bottom: 20px;
   box-sizing: border-box;
 }
@@ -68,7 +69,7 @@ h1 {
 
 .bar {
   height: 18px;
-  background: #333;
+  background: #222;
   border-radius: 10px;
   overflow: hidden;
 }
@@ -76,7 +77,17 @@ h1 {
 .fill {
   height: 100%;
   width: 0%;
-  transition: width 0.4s ease;
+  transition: width 0.4s ease, box-shadow 0.3s ease;
+}
+
+/* Glow crítico */
+.critical {
+  animation: criticalPulse 0.6s infinite alternate;
+}
+
+@keyframes criticalPulse {
+  from { box-shadow: 0 0 8px #ff0000; }
+  to { box-shadow: 0 0 20px #ff0000; }
 }
 
 /* Botones */
@@ -93,7 +104,7 @@ button {
   width: 100%;
   padding: 12px;
   font-size: 16px;
-  background: #222;
+  background: #111;
   color: #eee;
   border: 1px solid #444;
   border-radius: 8px;
@@ -102,8 +113,18 @@ button {
 }
 
 button:hover {
-  background: #333;
-  transform: scale(1.03);
+  box-shadow: 0 0 12px #00ffff;
+  transform: scale(1.04);
+}
+
+/* Pulsación advertencia */
+.warningPulse {
+  animation: warningPulse 1s infinite alternate;
+}
+
+@keyframes warningPulse {
+  from { box-shadow: 0 0 5px #ff4444; }
+  to { box-shadow: 0 0 18px #ff0000; }
 }
 
 /* Mensajes */
@@ -111,9 +132,10 @@ button:hover {
   width: 90%;
   max-width: 520px;
   font-size: 18px;
-  color: #ff7777;
   font-weight: 600;
   min-height: 40px;
+  margin-bottom: 10px;
+  transition: color 0.3s;
 }
 
 /* Gameover */
@@ -121,14 +143,19 @@ button:hover {
   display: none;
   width: 90%;
   max-width: 520px;
-  font-size: 22px;
-  line-height: 1.5;
+  font-size: 24px;
+  line-height: 1.6;
   color: #ffbb33;
-  text-shadow: 0 0 8px #ff6600;
+  text-shadow: 0 0 12px #ff6600;
   margin-top: 30px;
+  animation: finalAppear 1s ease forwards;
 }
 
-/* Ending */
+@keyframes finalAppear {
+  from { opacity: 0; transform: scale(0.8); }
+  to { opacity: 1; transform: scale(1); }
+}
+
 body.ending {
   justify-content: center;
 }
@@ -141,7 +168,7 @@ body.ending #message {
 }
 
 body.collapse {
-  background: #2a0000;
+  background: radial-gradient(circle, #330000, #000);
   animation: shake 0.3s infinite;
 }
 
@@ -175,11 +202,10 @@ body.collapse {
   <button onclick="act()">⚡ Optimizar procesos</button>
   <button onclick="act()">🚀 Expandirse</button>
   <button onclick="act()">🌟 Invertir en imagen</button>
-  <button onclick="ignore()">⚠️ Ignorar advertencias</button>
+  <button id="warnBtn" onclick="ignore()">⚠️ Ignorar advertencias</button>
 </div>
 
 <div id="message"></div>
-
 <div id="gameover"></div>
 
 <script>
@@ -187,28 +213,50 @@ let prod=10, crec=10, pres=10, press=0;
 let inactivityTimer;
 let autoPressureSpeed=1;
 let gameEnded=false;
+let typingInterval;
 
 function clamp(v){ return Math.min(v,100); }
+
+function setBar(id,val,color){
+  const el=document.getElementById(id);
+  el.style.width=clamp(val)+"%";
+  el.style.background=color;
+  el.style.boxShadow=`0 0 ${val/5}px ${color}`;
+}
 
 function update(){
   setBar("prod",prod,"#4caf50");
   setBar("crec",crec,"#2196f3");
   setBar("pres",pres,"#ffc107");
   setBar("pressure",press,"#f44336");
-}
 
-function setBar(id,val,color){
-  const el=document.getElementById(id);
-  el.style.width=clamp(val)+"%";
-  el.style.background=color;
+  const pressureBar=document.getElementById("pressure");
+  if(press>80){ pressureBar.classList.add("critical"); }
+  else{ pressureBar.classList.remove("critical"); }
+
+  if(press>70){ document.getElementById("warnBtn").classList.add("warningPulse"); }
+  else{ document.getElementById("warnBtn").classList.remove("warningPulse"); }
+
+  document.body.style.background=
+    `radial-gradient(circle at top, rgb(${20+press},0,0), #000)`;
 }
 
 function rand(min=2,max=6){
   return Math.floor(Math.random()*(max-min+1))+min;
 }
 
+/* Typewriter */
 function message(txt){
-  document.getElementById("message").textContent=txt;
+  clearInterval(typingInterval);
+  const el=document.getElementById("message");
+  el.textContent="";
+  let i=0;
+  typingInterval=setInterval(()=>{
+    if(i<txt.length){
+      el.textContent+=txt[i];
+      i++;
+    } else clearInterval(typingInterval);
+  },20);
 }
 
 function phaseMessage(){
@@ -266,7 +314,6 @@ function resetGame(){
   prod=10; crec=10; pres=10; press=0;
   autoPressureSpeed=1;
   gameEnded=false;
-
   document.body.classList.remove("collapse","ending");
   document.getElementById("gameover").style.display="none";
   message("Empieza la simulación.");
@@ -292,12 +339,7 @@ message("Empieza la simulación.");
 resetInactivity();
 </script>
 
-<script
-  src="https://pl28823082.effectivegatecpm.com/3b/76/22/3b76226b7a97057e8739c0a1ddb8b653.js">
-</script>
+<script src="https://pl28823082.effectivegatecpm.com/3b/76/22/3b76226b7a97057e8739c0a1ddb8b653.js"></script>
 
 </body>
 </html>
-</body>
-</html>
-
